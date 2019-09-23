@@ -1,0 +1,18 @@
+bank:
+  frequency: today
+  amount: 6000
+income:
+  frequency: every 5th of month
+  amount: 36000
+rent:
+  frequency: every 10th of month
+  amount: -8000
+diet:
+  frequency: every day
+  amount: -300
+electricity:
+  frequency: every 10th of month
+  amount: -1000
+insurance:
+  frequency: every month
+  amount: -1310

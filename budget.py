@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 
+import yaml
 import pandas as pd
 import datetime
 from recurrent import RecurringEvent
@@ -39,35 +40,27 @@ def get_dates(frequency, start, end):
     except ValueError as e:
         raise ValueError('Invalid frequency')
 
+def build_Calendar(budget, start, end):
+    calendar = pd.DataFrame(index=pd.date_range(start=start, end=end))
+
+    for k, v in budget.items():
+        frequency = v.get('frequency')
+        amount = v.get('amount')
+        dates = get_dates(frequency, start, end)
+        i = pd.DataFrame(
+            data={k: amount},
+            index=pd.DatetimeIndex(pd.Series(dates))
+        )
+        calendar = pd.concat([calendar, i], axis=1).fillna(0)
+
+    calendar['total'] = calendar.sum(axis=1)
+    calendar['cum_total'] = calendar['total'].cumsum()
+
+    return calendar
+
 TODAY = pd.Timestamp(datetime.datetime.now()).normalize()
 END = pd.Timestamp(2019, 12, 31).normalize()
+with open('budget.yaml') as f:
+    budget = yaml.safe_load(f.read())
 
-calender = pd.DataFrame(index=pd.date_range(start=TODAY, end=END))
-
-income = pd.DataFrame(
-    data={'income':36000},
-    index=pd.date_range(start=TODAY, end=END, freq='M').shift(5, 'D')
-)
-income = income.loc[(income.index >= TODAY) & (income.index <= END)]
-
-rent = pd.DataFrame(
-    data = {'rent': -8000},
-    index=pd.date_range(start=TODAY, end = END, freq='MS')
-)
-rent = rent.loc[(rent.index >= TODAY) & (rent.index <= END)]
-
-bank = pd.DataFrame(
-    data={'bank': 7259},
-    index=pd.date_range(start=TODAY, end = TODAY)
-)
-
-calender = pd.concat([calender, bank], axis=1).fillna(0)
-calender = pd.concat([calender, income], axis=1).fillna(0)
-calender = pd.concat([calender, rent], axis=1).fillna(0)
-calender['total'] = calender.sum(axis=1)
-calender['cum_total'] = calender['total'].cumsum()
-
-calender = update_totals(calender)
-# print(calender.tail(1))
-
-plot_budget(calender)
+plot_budget(build_Calendar(budget, TODAY, END))
