@@ -10,6 +10,7 @@ rent:
 diet:
   frequency: every day
   amount: -300
+  predict: true
 electricity:
   frequency: every 10th of month
   amount: -1000
