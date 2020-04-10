@@ -13,14 +13,23 @@ def xirr(values, dates):
     return newton(lambda r: xnpv(r, values, dates), 0)
 
 def test():
-    Values = [-3000, 1000, 1000, 1000, 1000]
-    Dates = [
-        pd.Timestamp('2017-01-01 00:00:00'),
-        pd.Timestamp('2018-01-01 00:00:00'),
-        pd.Timestamp('2019-01-01 00:00:00'),
-        pd.Timestamp('2020-01-01 00:00:00'),
-        pd.Timestamp('2021-01-01 00:00:00'),
+    Values = [-16345, -4326, -530, 3371, 7396, 9694,
+    6116,4387,
+    4474,
+     203045-198449
     ]
-
-    print(xnpv(0.05,Values,Dates))
+    Dates = [
+        pd.Timestamp('2019-09-30 00:00:00'),
+        pd.Timestamp('2020-09-30 00:00:00'),
+        pd.Timestamp('2021-09-30 00:00:00'),
+        pd.Timestamp('2022-09-30 00:00:00'),
+        pd.Timestamp('2023-09-30 00:00:00'),
+        pd.Timestamp('2024-09-30 00:00:00'),
+        pd.Timestamp('2025-09-30 00:00:00'),
+        pd.Timestamp('2026-09-30 00:00:00'),
+        pd.Timestamp('2027-09-30 00:00:00'),
+        pd.Timestamp('2028-09-30 00:00:00'),
+    ]
     print(xirr(Values, Dates))
+
+test()
