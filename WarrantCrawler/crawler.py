@@ -4,6 +4,8 @@ import requests
 from datetime import datetime
 import re
 from enum import IntEnum
+import json
+import os
 
 class WarrantType(IntEnum):
     NONE = 0
@@ -35,15 +37,14 @@ def GetType(name):
     return t
 
 def GetFloat(s):
-    replacements = [" ", "\n"]
-    s := s.replace(a, "") for a in replacements
+    replacements = [" ", "\n", ","]
+    [s := s.replace(a, "") for a in replacements]
     return float(s)
 
 def GetWarrant(soup):
     trs = soup.find(id="csvTable3").find(
         "tbody").find_all("tr", recursive=False)
     res = []
-    stockPrice = GetStockPrice(soup)
     today = datetime.today()
     for tr in trs:
         tds = tr.find_all("td", recursive=False)
@@ -51,6 +52,7 @@ def GetWarrant(soup):
         if (today > date): continue
 
         temp = lambda: None
+        
 
         temp.date = date
         temp.code = tds[0].a.text
@@ -64,17 +66,24 @@ def GetWarrant(soup):
 
     return res
 
+def printWarrant(w):
+    print(f"{w.code} {w.date} {w.type} {w.price} {w.strikePrice}")
+
 def Main():
     global driver
-
-    url = "https://www.twse.com.tw/zh/stockSearch/showStock?stkNo=2330"
+    with open(os.path.join(os.getcwd(),'WarrantCrawler', 'setting.json')) as f:
+        setting = json.load(f)
+    url = f"https://www.twse.com.tw/zh/stockSearch/showStock?stkNo={setting['stock']}"
     r = requests.get(url)
     soup = BeautifulSoup(r.text, 'html.parser')
-
+    stockPrice = GetStockPrice(soup)
     res = GetWarrant(soup)
-    for r in res:
-        print(f"{r.code} {r.type} {r.price}")
+    res = filter(lambda x: x.type == WarrantType.BUY, res)
+    res = filter(lambda x: x.strikePrice <= stockPrice, res)
+    res = filter(lambda x: x.strikePrice >= 600, res)
+    res = filter(lambda x: x.date >= datetime(2021,4,1), res)
+    res = sorted(res, key=lambda s: s.date)
+    for w in res:
+        printWarrant(w)
 
-# Main()
-
-print(GetFloat("  \n 123\n   "))
+Main()
